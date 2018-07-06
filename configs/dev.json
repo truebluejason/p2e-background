@@ -1,4 +1,5 @@
 {
-	"ServerAddr": "localhost",
+	"BotAddr": "http://127.0.0.1:3000/poll",
+	"ServerAddr": "http://127.0.0.1",
 	"ServerPort": "4000"
 }

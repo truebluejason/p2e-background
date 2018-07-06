@@ -1,4 +1,4 @@
-package readConf
+package readJson
 
 import (
 	"io/ioutil"
@@ -7,11 +7,12 @@ import (
 )
 
 type Settings struct {
+	BotAddr    string `json"BotAddr`
 	ServerAddr string `json:"ServerAddr"`
 	ServerPort string `json:"ServerPort"`
 }
 
-var settings Settings = Settings{"localhost", "8080"}
+var settings Settings = Settings{"http://127.0.0.1:3000/poll", "http://127.0.0.1", "8080"}
 
 func InitConfigs() (s Settings, err error) {
 	var file, env string
