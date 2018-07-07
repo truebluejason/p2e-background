@@ -1,24 +1,35 @@
 package timer
 
 import (
+	"github.com/truebluejason/p2e-background/internal/conf"
 	"net/http"
 	"io/ioutil"
 	"strconv"
-	"../syncLog"
+	"github.com/truebluejason/p2e-background/internal/syncLog"
 	"time"
 )
 
-func InitTimer(port string) {
-	go initTiming(port)
+func InitTimer() {
+	go initTiming()
 }
 
-func initTiming(port string) {
+func initTiming() {
 	var now time.Time
 	var formatted, recorded string
+	var port string = conf.Configs.ServerPort
 
 	for true {
 		now = time.Now()
-		formatted = strconv.Itoa(now.Hour()) + ":" + strconv.Itoa(now.Minute())
+
+		var minute int = now.Minute()
+		var minuteStr string
+		if minute < 10 {
+			minuteStr = "0" + strconv.Itoa(minute)
+		} else {
+			minuteStr = strconv.Itoa(minute)
+		}
+
+		formatted = strconv.Itoa(now.Hour()) + ":" + minuteStr
 
 		if recorded != formatted {
 			url := "http://127.0.0.1:" + port + "/ping?time=" + formatted
@@ -27,7 +38,7 @@ func initTiming(port string) {
 			resp, err := http.Get(url)
 			if err != nil {
 				syncLog.Println("[ERROR]: " + err.Error())
-				pause(20)
+				pause(10)
 				continue
 			}
 
@@ -35,13 +46,13 @@ func initTiming(port string) {
 			contents, err := ioutil.ReadAll(resp.Body)
 			if err != nil || string(contents) != "Ping Received" {
 				syncLog.Println("[ERROR]: Improper response received from ping")
-				pause(20)
+				pause(10)
 				continue
 			}
 
 			recorded = formatted
 		}
-		pause(20)
+		pause(10)
 	}
 }
 

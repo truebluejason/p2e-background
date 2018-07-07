@@ -1,19 +1,30 @@
 package poll
 
 import (
-	"../db"
-	"fmt"
+	"bytes"
+	"github.com/truebluejason/p2e-background/internal/conf"
+	"github.com/truebluejason/p2e-background/internal/db"
 	"net/http"
+	"io/ioutil"
+	"encoding/json"
 	"strconv"
+	"strings"
 	"sync"
-	"../syncLog"
+	"github.com/truebluejason/p2e-background/internal/syncLog"
 )
 
-func PollBot(formattedTime string, url string) {
-	go pollParallel(formattedTime, url)
+type Payload struct {
+	UserID string 		`json:"userID"`
+	ContentID string 	`json:"contentID"`
+	ContentType string 	`json:"contentType"`
+	Payload string 		`json:"payload"`
 }
 
-func pollParallel(formattedTime string, url string) {
+func PollBot(formattedTime string) {
+	pollParallel(formattedTime) // could've used goroutine for this
+}
+
+func pollParallel(formattedTime string) {
 	userIDs, err := db.GetUsersFromTime(formattedTime)
 	if err != nil {
 		syncLog.Println(err.Error())
@@ -28,36 +39,40 @@ func pollParallel(formattedTime string, url string) {
 		syncLog.Println(err.Error())
 		return
 	}
+
+	if !botIsUp() {
+		syncLog.Println("[ERROR]: P2E-Bot seems to be down.")
+		return
+	}
 	
 	var wg sync.WaitGroup
 	wg.Add(len(userIDs))
 
-	syncLog.Println("[INFO]: Poll WaitGroup Results ========")
+	syncLog.Println("[INFO]: Poll WaitGroup Results========")
 	for _, userID := range userIDs {
-		go poll(&wg, url, userID, content)
+		go poll(&wg, userID, content)
 	}
 
 	wg.Wait()
 	syncLog.Println("======================================")
 }
 
-func poll(wg *sync.WaitGroup, url string, userID string, content db.Content) {
+func poll(wg *sync.WaitGroup, userID string, content db.Content) {
 	defer wg.Done()
 
-	if content.Author != nil {
+	if content.Author != "" {
 		content.Payload = content.Payload + "\n- " + content.Author
 	}
 
-	msg := fmt.Sprint(
-`{
-	"userID": "`, strconv.Itoa(userID),`",
-	"contentID": "`, content.Id,`",
-	"contentType": "`, content.Type,`",
-	"payload": "`, content.Payload,`",
-}`)
-	jsonMsg := []byte(msg)
+	url := conf.Configs.BotURL
+	msg := Payload{userID, strconv.Itoa(content.Id), content.Type, content.Payload}
+	jsonMsg, err := json.Marshal(msg)
+	if err != nil {
+		syncLog.Println("[ERROR]: " + err.Error())
+		return
+	}
 
-	resp, err := http.Post(url, "application/json", bytes.NewBuffer(jsonValue))
+	resp, err := http.Post(url, "application/json", bytes.NewBuffer(jsonMsg))
 
 	if err != nil {
 		syncLog.Println("[ERROR]: " + err.Error())
@@ -70,8 +85,29 @@ func poll(wg *sync.WaitGroup, url string, userID string, content db.Content) {
 		syncLog.Println("[ERROR]: " + err.Error())
 		return
 	}
-	if botResponse != "Poll received" {
+	if string(botResponse) != "Poll received" {
 		syncLog.Println("[ERROR]: Bot's response wasn't 'Poll received'")
 		return
 	}
+	syncLog.Println("[INFO]: Polling successful for userID: " + userID + " :)")
+}
+
+func botIsUp() bool {
+	url := conf.Configs.BotURL
+	baseUrl := strings.TrimSuffix(url, "poll")
+
+	syncLog.Println("Pinging " + baseUrl)
+
+	resp, err := http.Get(baseUrl)
+	if err != nil {
+		syncLog.Println("[ERROR]: " + err.Error())
+		return false
+	}
+	defer resp.Body.Close()
+	contents, err := ioutil.ReadAll(resp.Body)
+	if err != nil || string(contents) != "hello world" {
+		syncLog.Println("string content is: " + string(contents))
+		return false
+	}
+	return true
 }

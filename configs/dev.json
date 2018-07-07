@@ -1,5 +1,8 @@
 {
-	"BotAddr": "http://127.0.0.1:3000/poll",
+	"BotURL": "http://127.0.0.1:3000/poll",
+	"DBName": "P2E",
+	"DBPassword": "path2enlightenment",
+	"DBUser": "root",
 	"ServerAddr": "http://127.0.0.1",
 	"ServerPort": "4000"
 }
