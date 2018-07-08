@@ -2,8 +2,8 @@ build:
 	go clean
 	go fmt
 	go vet
-	go build
-	echo "Binary created inside project directory."
+	env GOOS=linux GOARCH=amd64 GOARM=7 go build
+	echo "Linux specific binary created inside project directory."
 
 install:
 	go install
