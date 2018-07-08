@@ -61,7 +61,7 @@ func poll(wg *sync.WaitGroup, userID string, content db.Content) {
 	defer wg.Done()
 
 	if content.Author != "" {
-		content.Payload = content.Payload + "\n- " + content.Author
+		content.Payload = "\"*" + content.Payload + "*\"\n- " + content.Author
 	}
 
 	url := conf.Configs.BotURL

@@ -15,27 +15,17 @@ type Settings struct {
 	ServerPort 	string `json:"ServerPort"`
 }
 
-var defaultConfigs Settings = Settings{
-	"http://127.0.0.1:3000/poll",
-	"P2E",
-	"path2enlightenment",
-	"root",
-	"http://127.0.0.1",
-	"8080",
-}
-
 var Configs Settings = initConfigs()
 
 func initConfigs() (s Settings) {
 	var file, env string
-	s = defaultConfigs
 
 	env = os.Getenv("ENV")
 	switch env {
 	case "dev":
 		file = "./configs/dev.json"
 	default:
-		return s
+		file = "/etc/p2e-background.json"
 	}
 
 	raw, err := ioutil.ReadFile(file)
