@@ -1,5 +1,6 @@
 {
 	"BotURL": "http://127.0.0.1:3000/poll",
+	"DBHost": "127.0.0.1:3306",
 	"DBName": "P2E",
 	"DBPassword": "path2enlightenment",
 	"DBUser": "root",

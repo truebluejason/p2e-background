@@ -8,6 +8,7 @@ import (
 
 type Settings struct {
 	BotURL    	string `json"BotURL`
+	DBHost    	string `json"DBHost`
 	DBName    	string `json"DBName`
 	DBPassword  string `json"DBPassword`
 	DBUser    	string `json"DBUser`

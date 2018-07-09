@@ -13,7 +13,7 @@ type Content struct {
 	Payload string
 }
 
-var dataSource string = conf.Configs.DBUser + ":" + conf.Configs.DBPassword + "@/" + conf.Configs.DBName
+var dataSource string = conf.Configs.DBUser + ":" + conf.Configs.DBPassword + "@tcp(" + conf.Configs.DBHost + ")/" + conf.Configs.DBName
 
 func GetUsersFromTime(formattedTime string) ([]string, error) {
 	var userIDs []string
