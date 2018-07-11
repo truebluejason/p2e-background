@@ -24,9 +24,9 @@ func initConfigs() (s Settings) {
 	env = os.Getenv("ENV")
 	switch env {
 	case "dev":
-		file = "./configs/dev.json"
+		file = "./config/dev.json"
 	default:
-		file = "/etc/p2e-background.json"
+		file = "/p2e-background/config/production.json"
 	}
 
 	raw, err := ioutil.ReadFile(file)
