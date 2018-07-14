@@ -1,18 +1,25 @@
+VERSION := ${VERSION}
+
 build:
+	[ -n "${VERSION}" ] # "Example Use: VERSION=1.0.0 make build"
 	go clean
 	go fmt
 	go vet
-	env GOOS=linux GOARCH=amd64 GOARM=7 go build -o ${GOPATH}/bin/p2e-background
-	@echo "Linux specific binary created inside '${GOPATH}/bin' directory."
+	docker build . -t truebluejason/p2e-background:${VERSION}
+	docker system prune --force
+
+deploy:
+	[ -n "${VERSION}" ] # "Example Use: VERSION=1.0.0 make deploy"
+	docker tag truebluejason/p2e-background:${VERSION} truebluejason/p2e-background:latest
+	docker push truebluejason/p2e-background:${VERSION}
+	docker push truebluejason/p2e-background:latest
+	@echo "Image 'truebluejason/p2e-background' with versions '${VERSION}' and 'latest' pushed."
 
 install:
 	go install
 
 start_dev:
 	ENV=dev go run main.go
-
-start_dev_bin:
-	ENV=dev ./p2e-background
 
 test:
 	echo ${HELLO}
