@@ -28,7 +28,7 @@ func GetUsersFromTime(formattedTime string) ([]string, error) {
 	    return userIDs, err
 	}
 
-	rows, err := db.Query("SELECT UserID FROM UserTimes WHERE Stamp = ?", formattedTime)
+	rows, err := db.Query("SELECT UserID FROM UserTimes WHERE AdjustedStamp = ?", formattedTime)
 	if err != nil {
 		return userIDs, err
 	}
